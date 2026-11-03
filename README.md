@@ -1,6 +1,6 @@
 # AFL Lab
 
-Australian football explained with models you can try, check and argue with. By Mark Busani, Perth.
+Australian football explained with models you can try, check and validate with. By Mark Busani, Perth.
 
 ## What's here
 
