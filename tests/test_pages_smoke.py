@@ -77,3 +77,17 @@ def test_season_tables(base, page):
     assert page.locator("#calibration tbody tr").count() >= 1
     assert "Brier score" in page.text_content("#brier")
     assert "correlation" in page.text_content("#persistence")
+
+
+def test_photos_load_with_alt_and_credit(base, page):
+    for path, want in (("/", 2), (MODEL, 1)):
+        page.goto(base + path)
+        figs = page.locator("figure.photo")
+        assert figs.count() == want, path
+        for i in range(want):
+            fig = figs.nth(i)
+            img = fig.locator("img")
+            img.scroll_into_view_if_needed()
+            page.wait_for_function("el => el.complete && el.naturalWidth > 0", arg=img.element_handle())
+            assert img.get_attribute("alt"), path
+            assert "commons.wikimedia.org" in fig.locator("figcaption a").get_attribute("href"), path
