@@ -1,6 +1,6 @@
 """Build one AFL season's match results from the Squiggle API (https://api.squiggle.com.au).
 
-Usage: python3 afl/data/build_afl_games.py afl 2026   (competition, season)
+Usage: python3 data/build_afl_games.py afl 2026   (competition, season)
 Writes games_<comp>_<year>.csv, games_<comp>_<year>.json and conversion_<comp>_<year>.json next to this file.
 Data: Squiggle (Max Barry), https://squiggle.com.au. Standard library only."""
 import csv, datetime, json, os, pathlib, sys, urllib.request

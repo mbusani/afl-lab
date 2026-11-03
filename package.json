@@ -1,9 +1,9 @@
 {
-  "name": "football-analytics-lab",
+  "name": "afl-lab",
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test \"afl/tests/*.test.mjs\"",
-    "build:afl": "python3 afl/data/build_afl_games.py afl 2026 && node afl/scripts/build-deserved.mjs afl 2026"
+    "test": "node --test \"tests/*.test.mjs\"",
+    "build:afl": "python3 data/build_afl_games.py afl 2026 && node scripts/build-deserved.mjs afl 2026"
   }
 }

@@ -1,7 +1,7 @@
 /* AFL scoring-shots model: "Did they deserve to win?"
    Each scoring shot is a goal (6) with probability p, otherwise a behind (1).
    A team with S shots and G goals scores S + 5G. G ~ Binomial(S, p).
-   Pure functions, no DOM: shared by the model page and afl/scripts/build-deserved.mjs. */
+   Pure functions, no DOM: shared by the model page and scripts/build-deserved.mjs. */
 
 function check(shots, p) {
   for (const s of shots) {

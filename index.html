@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>AFL Lab</title>
+<meta name="description" content="AFL Lab by Mark Busani: Australian football explained with models you can try, check and argue with.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=IBM+Plex+Mono:wght@500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+/* Landing: the scoreboard hero states the thesis (a score is more than who won), then the three rules, the models, the author. */
+.hero { padding-block: 3rem 3.5rem; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: center; }
+.hero h1 { font-size: var(--s4); text-transform: uppercase; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero .lede { font-size: var(--s1); line-height: 1.45; margin-top: 1.25rem; max-width: 34ch; }
+.cta { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.75rem; }
+.btn { display: inline-flex; align-items: center; gap: 0.4rem; font: 700 var(--s0)/1 var(--display); letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; padding: 0.85rem 1.2rem; border-radius: var(--radius); border: 2px solid var(--fg); }
+.btn.primary { background: var(--fg); color: var(--bg); }
+.btn.primary:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn:hover { color: var(--accent); }
+
+/* the scoreboard: two scores that tell different stories */
+.sb-rows { display: grid; gap: 0.35rem; margin-top: 0.75rem; }
+.sb-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 1rem; align-items: baseline; padding-block: 0.55rem; border-bottom: 1px solid #22314a; }
+.sb-row:last-child { border-bottom: 0; }
+.sb-team { font: 800 clamp(1.4rem, 3.5vw, 2rem)/1 var(--display); text-transform: uppercase; letter-spacing: 0.03em; }
+.sb-gb { font: 500 clamp(1rem, 2.4vw, 1.35rem)/1 var(--mono); color: #b7c4d6; }
+.sb-pts { font: 800 clamp(2rem, 5vw, 3rem)/1 var(--display); color: var(--lamp); min-width: 2.2ch; text-align: right; }
+.sb-note { margin-top: 1rem; font-size: var(--s-1); color: #c3cfde; line-height: 1.5; }
+.sb-note b { color: var(--board-fg); }
+
+.rules { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; }
+.rule { display: grid; gap: 0.5rem; align-content: start; }
+.rule h3 { font-size: var(--s2); }
+.rule p { color: var(--muted); }
+
+.models { display: grid; gap: 0; border-top: 2px solid var(--fg); }
+.model { display: grid; grid-template-columns: 5rem minmax(0, 1fr) auto; gap: 1.25rem; align-items: center; padding-block: 1.25rem; border-bottom: 1px solid var(--line); text-decoration: none; }
+a.model:hover h3 { color: var(--accent); }
+.model .no { font: 800 var(--s3)/1 var(--display); color: var(--muted); }
+.model h3 { font-size: var(--s2); text-transform: none; letter-spacing: 0; }
+.model p { color: var(--muted); font-size: var(--s-1); margin-top: 0.3rem; }
+.chip { font: 700 0.8rem/1 var(--display); letter-spacing: 0.1em; text-transform: uppercase; padding: 0.4rem 0.6rem; border-radius: 999px; border: 1.5px solid currentColor; white-space: nowrap; }
+.chip.live { color: var(--home); }
+.chip.soon { color: var(--muted); }
+
+.about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; }
+.about p + p { margin-top: 1rem; }
+
+@media (max-width: 760px) {
+  .hero-grid, .about { grid-template-columns: minmax(0, 1fr); }
+  .rules { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+  .model { grid-template-columns: 3rem minmax(0, 1fr); }
+  .model .chip { grid-column: 2; justify-self: start; }
+}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+  <a class="brand" href="./"><svg viewBox="0 0 32 22" aria-hidden="true"><ellipse cx="16" cy="11" rx="15" ry="10" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M16 1v20M10 11h12" stroke="currentColor" stroke-width="2"/></svg>AFL Lab</a>
+  <nav aria-label="Main">
+    <a href="./" aria-current="page">Home</a>
+    <a href="models/deserved-to-win/">Models</a>
+    <a href="#about">About</a>
+  </nav>
+</div></header>
+
+<main>
+  <div class="wrap hero">
+    <div class="hero-grid">
+      <div>
+        <p class="label">Mark Busani · Perth, Western Australia</p>
+        <h1>Footy, explained <em>by the numbers</em></h1>
+        <p class="lede">Models you can try, check and argue with, plus commentary on what they say about the season.</p>
+        <div class="cta">
+          <a class="btn primary" href="models/deserved-to-win/">Try the first model →</a>
+          <a class="btn" href="#how">How it works</a>
+        </div>
+      </div>
+      <figure class="board" aria-label="Example scoreboard: two sides with the same scoring shots">
+        <p class="label">Example · same chances, different result</p>
+        <div class="sb-rows">
+          <div class="sb-row"><span class="sb-team">Home</span><span class="sb-gb">14.8</span><span class="sb-pts">92</span></div>
+          <div class="sb-row"><span class="sb-team">Away</span><span class="sb-gb">10.12</span><span class="sb-pts">72</span></div>
+        </div>
+        <p class="sb-note">Both sides had <b>22 scoring shots</b>. The 20-point margin is all goalkicking. Read a score as goals.behinds (points): <span class="score">14.8 (92)</span> is 14 goals and 8 behinds.</p>
+      </figure>
+    </div>
+  </div>
+
+  <section id="how"><div class="wrap">
+    <div class="sec-head"><h2>Three rules</h2><span class="label">How every piece works</span></div>
+    <div class="rules">
+      <div class="rule"><h3>Show the model</h3><p>Every model has a page where you change the inputs and watch the maths move. Nothing is hidden behind a number.</p></div>
+      <div class="rule"><h3>Check the model</h3><p>Each one publishes its own report card: how often its 70% calls came true, and where it goes wrong.</p></div>
+      <div class="rule"><h3>Tell the story</h3><p>The numbers only matter for what they say about the season. Each model comes with commentary in plain words.</p></div>
+    </div>
+  </div></section>
+
+  <section id="models"><div class="wrap">
+    <div class="sec-head"><h2>Models</h2><span class="label">In order of release</span></div>
+    <div class="models">
+      <a class="model" href="models/deserved-to-win/">
+        <span class="no">01</span>
+        <div><h3>Did they deserve to win?</h3><p>Scoring shots, goalkicking luck and the 2026 upsets. Includes the luck-or-skill test.</p></div>
+        <span class="chip live">Try it</span>
+      </a>
+      <div class="model">
+        <span class="no">02</span>
+        <div><h3>AFLW: did they deserve to win?</h3><p>The same model for the women's game, once a reliable source for goals and behinds is confirmed.</p></div>
+        <span class="chip soon">Waiting on data</span>
+      </div>
+      <div class="model">
+        <span class="no">03</span>
+        <div><h3>A-League Men and Women</h3><p>A soccer version built on shots, for weekly reads through the AFL off-season.</p></div>
+        <span class="chip soon">Waiting on data</span>
+      </div>
+    </div>
+  </div></section>
+
+  <section id="about"><div class="wrap">
+    <div class="sec-head"><h2>About</h2></div>
+    <div class="about">
+      <div class="read">
+        <p>I'm Mark Busani, an analyst in Perth working with SQL, Python and R. I'm studying the Barça Innovation Hub's Sports Analytics Postgraduate and starting an AFL analyst course in January 2027.</p>
+        <p>AFL Lab is where I build models in the open. Most footy sites tell you who will win. This one explains why results happen, shows its working, and says when the model is wrong.</p>
+      </div>
+      <div class="read">
+        <p class="label">Data and credits</p>
+        <p>Match scores come from the <a href="https://api.squiggle.com.au">Squiggle API</a> by Max Barry. The site uses only public match scores, never licensed player-tracking data. Code is MIT-licensed.</p>
+      </div>
+    </div>
+  </div></section>
+</main>
+
+<footer><div class="wrap">
+  <span>AFL Lab by Mark Busani, Perth. Not affiliated with the AFL or any club.</span>
+  <span>Scores shown as goals.behinds (points).</span>
+</div></footer>
+</body>
+</html>

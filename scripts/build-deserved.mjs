@@ -1,5 +1,5 @@
-/* Runs the scoring-shots model over a season and writes afl/data/deserved_<comp>_<year>.json.
-   Usage: node afl/scripts/build-deserved.mjs [comp] [year]   (default: afl 2026) */
+/* Runs the scoring-shots model over a season and writes data/deserved_<comp>_<year>.json.
+   Usage: node scripts/build-deserved.mjs [comp] [year]   (default: afl 2026) */
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -119,7 +119,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const f = join(dataDir, `${name}_${comp}_${year}.json`);
     try { return JSON.parse(readFileSync(f, "utf8")); } catch (e) {
       if (e.code !== "ENOENT") throw e;
-      console.error(`missing afl/data/${name}_${comp}_${year}.json: run SQUIGGLE_CONTACT=<email> npm run build:afl first`);
+      console.error(`missing data/${name}_${comp}_${year}.json: run SQUIGGLE_CONTACT=<email> npm run build:afl first`);
       process.exit(1);
     }
   };

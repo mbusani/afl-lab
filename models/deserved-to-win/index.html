@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Did They Deserve to Win?</title>
+<meta name="description" content="An AFL model that splits a result into chances created and goalkicking, with the 2026 season's biggest upsets and a luck ladder.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=IBM+Plex+Mono:wght@500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<style>
+/* Model page: the calculator is the hero (scoreboard panel), then method, season analysis, report card. */
+.intro { padding-block: 2.5rem 1.5rem; display: grid; gap: 1rem; }
+.intro h1 { font-size: var(--s4); text-transform: uppercase; }
+.intro .lede { font-size: var(--s1); line-height: 1.45; max-width: 46ch; }
+
+.calc { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: clamp(1rem, 3vw, 2.5rem); }
+.inputs { display: grid; gap: 1.25rem; align-content: start; }
+.side { display: grid; gap: 0.5rem; }
+.side .who { font: 800 var(--s1)/1 var(--display); text-transform: uppercase; letter-spacing: 0.04em; display: flex; align-items: center; gap: 0.5rem; }
+.side .who i { width: 0.8rem; height: 0.8rem; border-radius: 2px; display: inline-block; }
+.who.home i { background: var(--home); } .who.away i { background: var(--away); }
+.stepper { display: grid; grid-template-columns: 3rem minmax(0, 1fr) 3rem; border: 1px solid #2a3b57; border-radius: var(--radius); overflow: hidden; }
+.stepper button { background: #16233a; color: var(--board-fg); border: 0; font: 800 1.5rem/1 var(--display); cursor: pointer; }
+.stepper button:hover { background: #20304d; color: var(--lamp); }
+.stepper input { width: 100%; min-width: 0; background: transparent; color: var(--lamp); border: 0; text-align: center; font: 800 2.4rem/1 var(--display); padding: 0.35rem 0; -moz-appearance: textfield; }
+.stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.conv { display: grid; gap: 0.4rem; }
+.conv-row { display: flex; align-items: center; gap: 0.75rem; }
+.conv input[type=range] { flex: 1; min-width: 0; accent-color: var(--lamp); }
+.conv output { font: 800 1.6rem/1 var(--display); color: var(--lamp); min-width: 3.2ch; text-align: right; }
+.hint { font-size: var(--s-1); color: #9fb0c6; }
+
+.result { display: grid; gap: 1rem; align-content: start; }
+.probs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
+.prob b { display: block; font: 800 clamp(2rem, 5vw, 3.2rem)/1 var(--display); }
+.prob.home b { color: #8fb3ff; } .prob.away b { color: #ff9a78; } .prob.draw b { color: #c8d2df; }
+.bar { display: flex; height: 0.75rem; border-radius: 999px; overflow: hidden; background: #22314a; }
+.bar span { display: block; height: 100%; transition: width .25s ease; }
+.bar .h { background: var(--home); } .bar .d { background: var(--draw); } .bar .a { background: var(--away); }
+.exp { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; border-top: 1px solid #22314a; padding-top: 0.9rem; }
+.exp .label { display: block; margin-bottom: 0.35rem; }
+.exp b { display: block; font: 800 var(--s2)/1 var(--display); color: var(--board-fg); }
+.exp small { display: block; font: 500 0.85rem/1.4 var(--mono); color: #9fb0c6; }
+#dist { width: 100%; height: auto; display: block; }
+#dist text { fill: #9fb0c6; font: 500 11px var(--mono); }
+.verdict { font-size: var(--s0); line-height: 1.5; color: #dbe3ee; }
+
+.method { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2.5rem; }
+.method ul { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.6rem; }
+.formula { font: 500 var(--s0)/1.8 var(--mono); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.2rem; overflow-x: auto; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; }
+.sub { display: grid; gap: 0.75rem; align-content: start; }
+.sub > p { color: var(--muted); font-size: var(--s-1); }
+.lead { font-size: var(--s1); line-height: 1.5; max-width: 60ch; }
+.luck-pos { color: var(--home); } .luck-neg { color: var(--away); }
+
+@media (max-width: 820px) {
+  .calc, .method, .grid2 { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+  <a class="brand" href="../../"><svg viewBox="0 0 32 22" aria-hidden="true"><ellipse cx="16" cy="11" rx="15" ry="10" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M16 1v20M10 11h12" stroke="currentColor" stroke-width="2"/></svg>AFL Lab</a>
+  <nav aria-label="Main">
+    <a href="../../">Home</a>
+    <a href="./" aria-current="page">Models</a>
+    <a href="../../#about">About</a>
+  </nav>
+</div></header>
+
+<main>
+  <div class="wrap intro">
+    <p class="label">Model 01</p>
+    <h1>Did they deserve to win?</h1>
+    <p class="lede">A score mixes two things: how many chances a team made, and how well it kicked for goal. This model separates them.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="board calc" id="model">
+      <form class="inputs" onsubmit="return false" aria-label="Model inputs">
+        <div class="side">
+          <label class="who home" for="home-shots"><i aria-hidden="true"></i>Home scoring shots</label>
+          <div class="stepper">
+            <button type="button" data-step="home-shots" data-d="-1" aria-label="One fewer home shot">−</button>
+            <input id="home-shots" type="number" inputmode="numeric" min="0" max="60" step="1" value="25">
+            <button type="button" data-step="home-shots" data-d="1" aria-label="One more home shot">+</button>
+          </div>
+        </div>
+        <div class="side">
+          <label class="who away" for="away-shots"><i aria-hidden="true"></i>Away scoring shots</label>
+          <div class="stepper">
+            <button type="button" data-step="away-shots" data-d="-1" aria-label="One fewer away shot">−</button>
+            <input id="away-shots" type="number" inputmode="numeric" min="0" max="60" step="1" value="20">
+            <button type="button" data-step="away-shots" data-d="1" aria-label="One more away shot">+</button>
+          </div>
+        </div>
+        <div class="conv">
+          <label class="label" for="p">Goal conversion (each shot's chance of a goal)</label>
+          <div class="conv-row"><input id="p" type="range" min="0.30" max="0.75" step="0.01" value="0.53"><output id="p-out" for="p">53%</output></div>
+          <p class="hint" id="p-hint">Set to 53% until the 2026 league rate is loaded.</p>
+        </div>
+        <p class="hint">A scoring shot is any goal or behind: <span class="score">12.10</span> is 22 scoring shots.</p>
+      </form>
+
+      <div class="result" aria-live="polite">
+        <div class="probs">
+          <div class="prob home"><span class="label">Home win</span><b id="home-prob">–</b></div>
+          <div class="prob draw"><span class="label">Draw</span><b id="draw-prob">–</b></div>
+          <div class="prob away"><span class="label">Away win</span><b id="away-prob">–</b></div>
+        </div>
+        <div class="bar" aria-hidden="true"><span class="h" id="bar-h"></span><span class="d" id="bar-d"></span><span class="a" id="bar-a"></span></div>
+        <div class="exp">
+          <div><span class="label">Home expected</span><b id="home-exp">–</b><small id="home-exp-gb"></small></div>
+          <div><span class="label">Away expected</span><b id="away-exp">–</b><small id="away-exp-gb"></small></div>
+        </div>
+        <svg id="dist" viewBox="0 0 600 200" role="img" aria-label="Chance of each final score for both teams"></svg>
+        <p class="verdict" id="verdict"></p>
+      </div>
+    </div>
+  </div>
+
+  <section id="method"><div class="wrap method">
+    <div class="stack read">
+      <h2>How it works</h2>
+      <p>Every scoring shot becomes a goal with the same chance, the league's goal conversion rate for the season. The rest are behinds. Because a goal is worth six and a behind one, a team with S scoring shots and G goals scores S + 5G points.</p>
+      <div class="formula">expected score = S × (1 + 5p)<br>win chance = every pair of possible scores, added up exactly</div>
+      <p>Nothing is simulated. The model works through every possible number of goals for both teams and adds up how often each side finishes in front.</p>
+    </div>
+    <div class="stack read">
+      <h3>Where it's wrong</h3>
+      <ul>
+        <li>Every shot gets the same chance. A set shot from 15 metres and a snap from the boundary are treated alike, because shot-location data isn't public.</li>
+        <li>Rushed behinds count as scoring shots, and shots that miss everything don't count at all.</li>
+        <li>It ignores the state of the game. A side 40 points up can stop chasing shots.</li>
+      </ul>
+    </div>
+  </div></section>
+
+  <section id="season"><div class="wrap stack">
+    <div class="sec-head"><h2>2026: the results goalkicking decided</h2></div>
+    <p class="lead" id="summary">The season analysis appears here once the 2026 data has been built.</p>
+    <div class="grid2">
+      <div class="sub">
+        <h3>Biggest upsets by scoring shots</h3>
+        <p>Winners the model gave the smallest chance, from each side's scoring shots.</p>
+        <div id="upsets-box"><div class="pending">Waiting for <code>data/deserved_afl_2026.json</code>. Run <code>npm run build:afl</code> to build it.</div></div>
+      </div>
+      <div class="sub">
+        <h3>Luck ladder</h3>
+        <p>Wins minus expected wins. Positive means a team won more than its scoring shots earned.</p>
+        <div id="ladder-box"><div class="pending">The ladder needs the same data file.</div></div>
+      </div>
+    </div>
+    <div class="sub read">
+      <h3>Luck or skill?</h3>
+      <p class="lead" id="persistence">If straight kicking is a skill, teams that kicked well early in the season should keep doing it. This test compares rounds 1–12 with the rest of the season once the data is in.</p>
+    </div>
+  </div></section>
+
+  <section id="report-card"><div class="wrap stack">
+    <div class="sec-head"><h2>Does the model work?</h2></div>
+    <p class="lead">If the model is honest, favourites it gives a 70% chance should win about 70% of the time. Each row groups 2026 matches by the favourite's chance.</p>
+    <div id="calibration-box"><div class="pending">The report card fills in from the same 2026 data file.</div></div>
+    <p class="lead" id="brier"></p>
+    <p class="read" style="color: var(--muted); font-size: var(--s-1)">This checks the model on matches already played, after the final siren. It shows the model is fair about chances. It doesn't show it can tip next week's winners.</p>
+  </div></section>
+
+  <section id="credits"><div class="wrap read stack">
+    <h3>Data and credits</h3>
+    <p>Match scores come from the <a href="https://api.squiggle.com.au">Squiggle API</a> by Max Barry (<a href="https://squiggle.com.au">squiggle.com.au</a>). The model and code are MIT-licensed. Rebuild the data with <code>data/build_afl_games.py</code> and <code>scripts/build-deserved.mjs</code>.</p>
+  </div></section>
+</main>
+
+<footer><div class="wrap">
+  <span>AFL Lab by Mark Busani, Perth. Not affiliated with the AFL or any club.</span>
+</div></footer>
+
+<script type="module">
+import { winProbability, scoreDistribution } from "../../assets/scoring-shots.js";
+
+const $ = (id) => document.getElementById(id);
+const pct = (x) => (x * 100).toFixed(1) + "%";
+const n = (x) => Number(x); // every number goes through this before reaching innerHTML
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const shots = (id) => Math.min(60, Math.max(0, Math.round(+$(id).value || 0)));
+
+function drawDist(h, a, p) {
+  const H = scoreDistribution(h, p), A = scoreDistribution(a, p);
+  const all = [...H, ...A];
+  const maxS = Math.max(10, ...all.map((d) => d.score)), maxP = Math.max(...all.map((d) => d.prob));
+  const x = (s) => 20 + (s / maxS) * 560, y = (q) => 175 - (q / maxP) * 160;
+  const bars = (d, colour, dx) => d.filter((r) => r.prob > 0.001).map((r) =>
+    `<rect x="${(x(r.score) + dx).toFixed(1)}" y="${y(r.prob).toFixed(1)}" width="4" height="${(175 - y(r.prob)).toFixed(1)}" fill="${colour}" rx="1"><title>${r.score} points: ${pct(r.prob)}</title></rect>`).join("");
+  const ticks = [];
+  const step = maxS > 120 ? 40 : 20;
+  for (let s = 0; s <= maxS; s += step) ticks.push(`<line x1="${x(s)}" x2="${x(s)}" y1="175" y2="179" stroke="#5c6f8c"/><text x="${x(s)}" y="194" text-anchor="middle">${s}</text>`);
+  const style = getComputedStyle(document.documentElement);
+  $("dist").innerHTML = `<line x1="20" y1="175" x2="580" y2="175" stroke="#5c6f8c"/>` + ticks.join("") +
+    bars(H, style.getPropertyValue("--home").trim() || "#6f9cff", -2.5) + bars(A, style.getPropertyValue("--away").trim() || "#ff7a52", 1.5);
+}
+
+function goalsBehinds(s, p) {
+  const g = s * p, b = s - g;
+  return `about ${Math.round(g)}.${Math.round(b)} (${Math.round(g)} goals, ${Math.round(b)} behinds)`;
+}
+
+function update() {
+  const h = shots("home-shots"), a = shots("away-shots");
+  const p = +$("p").value;
+  $("p-out").textContent = Math.round(p * 100) + "%";
+  const w = winProbability({ homeShots: h, awayShots: a, p });
+  $("home-prob").textContent = pct(w.home);
+  $("draw-prob").textContent = pct(w.draw);
+  $("away-prob").textContent = pct(w.away);
+  $("bar-h").style.width = pct(w.home); $("bar-d").style.width = pct(w.draw); $("bar-a").style.width = pct(w.away);
+  $("home-exp").textContent = w.homeExpected.toFixed(1);
+  $("away-exp").textContent = w.awayExpected.toFixed(1);
+  $("home-exp-gb").textContent = goalsBehinds(h, p);
+  $("away-exp-gb").textContent = goalsBehinds(a, p);
+  const gap = Math.abs(w.homeExpected - w.awayExpected).toFixed(1);
+  $("verdict").textContent = h === a
+    ? "Even chances. The result comes down to who kicks straighter."
+    : `${h > a ? "Home" : "Away"} created ${Math.abs(h - a)} more scoring ${Math.abs(h - a) === 1 ? "shot" : "shots"}, worth about ${gap} points. ` +
+      `${h > a ? "Away" : "Home"} wins this ${pct(h > a ? w.away : w.home)} of the time, through straighter kicking alone.`;
+  drawDist(h, a, p);
+}
+
+for (const id of ["home-shots", "away-shots", "p"]) $(id).addEventListener("input", update);
+document.querySelectorAll("[data-step]").forEach((b) => b.addEventListener("click", () => {
+  const el = $(b.dataset.step);
+  el.value = Math.min(60, Math.max(0, shots(b.dataset.step) + Number(b.dataset.d)));
+  update();
+}));
+
+update();
+
+fetch("../../data/conversion_afl_2026.json").then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then((c) => {
+    if (typeof c.p === "number") {
+      $("p").value = c.p;
+      $("p-hint").textContent = `Set to the 2026 league rate: ${pct(c.p)} of scoring shots were goals.`;
+      update();
+    }
+  }).catch(() => {});
+
+fetch("../../data/deserved_afl_2026.json").then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((d) => {
+  $("summary").textContent = `Across ${n(d.summary.matches)} decided 2026 matches with uneven scoring shots, the side with more of them ` +
+    `(at a ${Math.round(n(d.p) * 100)}% conversion rate) won ${pct(n(d.summary.model_right_pct))} of the time. These are the exceptions.`;
+  $("upsets-box").innerHTML = `<div class="table-scroll"><table id="upsets"><thead><tr><th>Round</th><th>Result</th><th class="n">Score</th><th class="n">Shots</th><th class="n">Winner's chance</th></tr></thead><tbody>` +
+    d.upsets.map((m) => {
+      const homeWon = n(m.home_score) > n(m.away_score);
+      return `<tr><td>${esc(m.roundname)}</td><td>${esc(homeWon ? m.home : m.away)} d. ${esc(homeWon ? m.away : m.home)}</td>` +
+        `<td class="n">${n(m.home_score)}–${n(m.away_score)}</td><td class="n">${n(m.home_shots)}–${n(m.away_shots)}</td><td class="n">${pct(n(m.winner_win_prob))}</td></tr>`;
+    }).join("") + `</tbody></table></div>`;
+  $("ladder-box").innerHTML = `<div class="table-scroll"><table id="ladder"><thead><tr><th>Team</th><th class="n">Wins</th><th class="n">Expected</th><th class="n">Conversion</th><th class="n">Luck</th></tr></thead><tbody>` +
+    d.ladder.map((t) => {
+      const l = n(t.luck);
+      return `<tr><td>${esc(t.team)}</td><td class="n">${n(t.wins)}</td><td class="n">${n(t.expected_wins).toFixed(1)}</td>` +
+        `<td class="n">${t.conversion === null ? "–" : pct(n(t.conversion))}</td><td class="n ${l >= 0 ? "luck-pos" : "luck-neg"}">${l > 0 ? "+" : ""}${l.toFixed(1)}</td></tr>`;
+    }).join("") + `</tbody></table></div>`;
+  const r = d.persistence.correlation;
+  $("persistence").textContent = r === null ? "There aren't enough games yet to compare the two halves of the season." :
+    `Teams that kicked straight in rounds 1–${n(d.persistence.split_round)} ` +
+    (Math.abs(r) < 0.3 ? "didn't reliably keep doing it afterwards" : r > 0 ? "mostly kept doing it afterwards" : "tended to get worse afterwards") +
+    ` (correlation ${n(r).toFixed(2)} across ${n(d.persistence.teams.length)} teams). ` +
+    (Math.abs(r) < 0.3 ? "That points to luck more than skill." : "That points to some real goalkicking skill, so read the luck ladder with that in mind.");
+  $("calibration-box").innerHTML = `<div class="table-scroll"><table id="calibration"><thead><tr><th>Favourite's chance</th><th class="n">Matches</th><th class="n">Expected wins</th><th class="n">Actual wins</th></tr></thead><tbody>` +
+    d.calibration.bins.filter((b) => n(b.n)).map((b) =>
+      `<tr><td>${Math.round(n(b.lo) * 100)}–${Math.round(n(b.hi) * 100)}%</td><td class="n">${n(b.n)}</td>` +
+      `<td class="n">${n(b.fav_expected).toFixed(1)}</td><td class="n">${n(b.fav_points).toFixed(1)}</td></tr>`).join("") + `</tbody></table></div>`;
+  $("brier").textContent = `Brier score ${n(d.calibration.brier).toFixed(3)}. Zero is perfect, and always saying 50/50 scores 0.250.`;
+}).catch(() => {});
+</script>
+</body>
+</html>
