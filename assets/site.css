@@ -78,11 +78,9 @@ section:last-of-type { border-bottom: 0; }
 /* photos: archival and venue shots, always credited in the caption */
 .photo { margin: 0; display: grid; gap: 0.5rem; }
 .photo img { display: block; width: 100%; height: auto; border-radius: var(--radius); }
-.photo.wide img { aspect-ratio: 21 / 9; object-fit: cover; object-position: 50% 62%; }
 .photo figcaption { font-size: var(--s-1); line-height: 1.4; color: var(--muted); }
 .about .photo { margin-top: 1.5rem; }
 #season .photo { max-width: 68ch; }
-@media (max-width: 760px) { .photo.wide img { aspect-ratio: 3 / 2; } }
 
 /* footer */
 footer { border-top: 1px solid var(--line); color: var(--muted); font-size: var(--s-1); }

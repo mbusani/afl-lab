@@ -90,4 +90,4 @@ def test_photos_load_with_alt_and_credit(base, page):
             img.scroll_into_view_if_needed()
             page.wait_for_function("el => el.complete && el.naturalWidth > 0", arg=img.element_handle())
             assert img.get_attribute("alt"), path
-            assert "commons.wikimedia.org" in fig.locator("figcaption a").get_attribute("href"), path
+            assert "commons.wikimedia.org" in fig.locator("figcaption a").first.get_attribute("href"), path
