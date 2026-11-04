@@ -91,3 +91,69 @@ def test_photos_load_with_alt_and_credit(base, page):
             page.wait_for_function("el => el.complete && el.naturalWidth > 0", arg=img.element_handle())
             assert img.get_attribute("alt"), path
             assert "commons.wikimedia.org" in fig.locator("figcaption a").first.get_attribute("href"), path
+
+
+def test_home_cards_and_map(base, page):
+    page.goto(base + "/")
+    assert page.locator("#stops .stop").count() == 3
+    assert page.locator("#stops-dev .stop").count() == 3
+    assert "In development" in page.text_content("#stops-dev")
+    assert page.locator("#map a.map-node").count() == 6
+    assert page.locator("#map a.map-node.dev").count() == 3
+    assert page.locator("nav.top a.lnk").count() == 7
+    assert page.errors == []
+
+
+def test_home_ball_route_uses_live_sections_only(base, page):
+    page.goto(base + "/")
+    route = page.get_attribute("#map .map-pass", "d")
+    live = page.evaluate("""() => [...document.querySelectorAll('#map a.map-node:not(.dev) circle')]
+        .map(c => c.getAttribute('cx') + ' ' + c.getAttribute('cy'))""")
+    assert len(live) == 3
+    assert route == "M" + " L".join(live) + " Z"
+
+
+def test_home_has_no_night_styled_text_outside_hero(base, page):
+    page.goto(base + "/")
+    assert page.locator(".hero nav.top .brand").count() == 1
+    assert page.locator(".hero .eyebrow").count() == 1
+    assert page.locator(".hero .lede").count() == 1
+    outside = ".brand, .eyebrow, .lede, nav.top"
+    assert page.evaluate("s => [...document.querySelectorAll(s)].filter(e => !e.closest('.hero')).length", outside) == 0
+
+
+@pytest.mark.parametrize("scheme", ["light", "dark"])
+def test_home_focus_ring_is_lamp_on_night_surfaces(base, page, scheme):
+    """Tabs to a real link in the hero, the SVG map and the footer, and reads the ring the browser would draw."""
+    page.emulate_media(color_scheme=scheme)
+    page.goto(base + "/")
+    lamp = page.evaluate("""() => { const d = document.createElement('i'); d.style.color = getComputedStyle(document.documentElement).getPropertyValue('--lamp');
+        document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; }""")
+    seen = {}
+    for _ in range(60):
+        page.keyboard.press("Tab")
+        ring = page.evaluate("""() => { const a = document.activeElement; if (!a.matches(':focus-visible')) return null;
+            const area = a.closest('#map') ? 'map' : a.closest('.hero') ? 'hero' : a.closest('footer') ? 'footer' : null;
+            const s = getComputedStyle(a); return area && {area, style: s.outlineStyle, colour: s.outlineColor, width: s.outlineWidth}; }""")
+        if ring:
+            seen[ring["area"]] = ring
+    page.emulate_media(color_scheme="light")
+    assert set(seen) == {"hero", "map", "footer"}
+    for ring in seen.values():
+        assert (ring["style"], ring["colour"], ring["width"]) == ("solid", lamp, "3px"), ring
+
+
+def test_home_example_board_lines_up_with_the_page(base, page):
+    """A <figure> has a default side margin, which would inset the board and squeeze it on a phone."""
+    page.goto(base + "/")
+    board = page.locator("#example figure.board").bounding_box()
+    photo = page.locator("#example figure.photo").bounding_box()
+    assert board["x"] == photo["x"]
+    assert board["width"] == photo["width"]
+
+
+def test_home_coming_next_label_clears_its_cards(base, page):
+    page.goto(base + "/")
+    label = page.locator(".coming .label").bounding_box()
+    cards = page.locator("#stops-dev").bounding_box()
+    assert cards["y"] - (label["y"] + label["height"]) >= 8
