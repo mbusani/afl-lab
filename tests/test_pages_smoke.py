@@ -111,6 +111,7 @@ def test_home_ball_route_uses_live_sections_only(base, page):
         .map(c => c.getAttribute('cx') + ' ' + c.getAttribute('cy'))""")
     assert len(live) == 3
     assert route == "M" + " L".join(live) + " Z"
+    assert page.get_attribute("#map animateMotion", "path") == route
 
 
 def test_home_has_no_night_styled_text_outside_hero(base, page):
@@ -130,6 +131,7 @@ def test_home_focus_ring_is_lamp_on_night_surfaces(base, page, scheme):
     lamp = page.evaluate("""() => { const d = document.createElement('i'); d.style.color = getComputedStyle(document.documentElement).getPropertyValue('--lamp');
         document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; }""")
     seen = {}
+    rings = []
     for _ in range(60):
         page.keyboard.press("Tab")
         ring = page.evaluate("""() => { const a = document.activeElement; if (!a.matches(':focus-visible')) return null;
@@ -137,14 +139,17 @@ def test_home_focus_ring_is_lamp_on_night_surfaces(base, page, scheme):
             const s = getComputedStyle(a); return area && {area, style: s.outlineStyle, colour: s.outlineColor, width: s.outlineWidth}; }""")
         if ring:
             seen[ring["area"]] = ring
+            rings.append(ring)
     page.emulate_media(color_scheme="light")
     assert set(seen) == {"hero", "map", "footer"}
-    for ring in seen.values():
+    for ring in rings:
         assert (ring["style"], ring["colour"], ring["width"]) == ("solid", lamp, "3px"), ring
 
 
 def test_home_example_board_lines_up_with_the_page(base, page):
     """A <figure> has a default side margin, which would inset the board and squeeze it on a phone."""
+    page.set_viewport_size({"width": 375, "height": 800})
+    page.set_viewport_size({"width": 375, "height": 800})
     page.goto(base + "/")
     board = page.locator("#example figure.board").bounding_box()
     photo = page.locator("#example figure.photo").bounding_box()
@@ -157,3 +162,33 @@ def test_home_coming_next_label_clears_its_cards(base, page):
     label = page.locator(".coming .label").bounding_box()
     cards = page.locator("#stops-dev").bounding_box()
     assert cards["y"] - (label["y"] + label["height"]) >= 8
+
+
+def test_home_ball_sits_still_with_reduced_motion(base, page):
+    page.emulate_media(reduced_motion="reduce")
+    try:
+        page.goto(base + "/")
+        page.wait_for_selector("#map .map-ball")
+        assert page.locator("#map animateMotion").count() == 0
+    finally:
+        page.emulate_media(reduced_motion="no-preference")
+    page.goto(base + "/")
+    assert page.locator("#map animateMotion").count() == 1
+
+
+def test_night_surface_links_stay_lamp_or_chalk_on_hover_in_light_mode(base, page):
+    """a:hover would otherwise turn night-surface links the dark-amber accent (about 2.7:1 on night)."""
+    page.emulate_media(color_scheme="light")
+    page.goto(base + "/")
+    lamp = page.evaluate("""() => { const d = document.createElement('i'); d.style.color = getComputedStyle(document.documentElement).getPropertyValue('--lamp');
+        document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; }""")
+    def colour(sel):
+        return page.evaluate("s => getComputedStyle(document.querySelector(s)).color", sel)
+    try:
+        for sel in ("footer a", "nav.top a.brand"):
+            page.hover(sel)
+            assert colour(sel) == lamp, sel
+        page.hover("footer a")
+        assert page.evaluate("s => getComputedStyle(document.querySelector(s)).textDecorationColor", "footer a") == lamp
+    finally:
+        page.mouse.move(0, 0)
