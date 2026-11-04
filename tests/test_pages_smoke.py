@@ -149,7 +149,6 @@ def test_home_focus_ring_is_lamp_on_night_surfaces(base, page, scheme):
 def test_home_example_board_lines_up_with_the_page(base, page):
     """A <figure> has a default side margin, which would inset the board and squeeze it on a phone."""
     page.set_viewport_size({"width": 375, "height": 800})
-    page.set_viewport_size({"width": 375, "height": 800})
     page.goto(base + "/")
     board = page.locator("#example figure.board").bounding_box()
     photo = page.locator("#example figure.photo").bounding_box()
