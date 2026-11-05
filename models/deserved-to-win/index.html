@@ -6,15 +6,19 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>Did They Deserve to Win?</title>
 <meta name="description" content="An AFL model that splits a result into chances created and goalkicking, with the 2026 season's biggest upsets and a luck ladder.">
+<meta property="og:title" content="Did they deserve to win? · AFL Lab">
+<meta property="og:description" content="An AFL model that splits a result into chances created and goalkicking.">
+<meta property="og:url" content="https://mbusani.github.io/afl-lab/models/deserved-to-win/">
+<meta property="og:image" content="https://mbusani.github.io/afl-lab/assets/img/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=IBM+Plex+Mono:wght@500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/site.js"></script>
 <style>
 /* Model page: the calculator is the hero (scoreboard panel), then method, season analysis, report card. */
-.intro { padding-block: 2.5rem 1.5rem; display: grid; gap: 1rem; }
-.intro h1 { font-size: var(--s4); text-transform: uppercase; }
-.intro .lede { font-size: var(--s1); line-height: 1.45; max-width: 46ch; }
 
 .calc { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: clamp(1rem, 3vw, 2.5rem); }
 .inputs { display: grid; gap: 1.25rem; align-content: start; }
@@ -64,23 +68,20 @@
 </head>
 <body>
 
-<header class="top"><div class="wrap">
-  <a class="brand" href="../../"><svg viewBox="0 0 32 22" aria-hidden="true"><ellipse cx="16" cy="11" rx="15" ry="10" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M16 1v20M10 11h12" stroke="currentColor" stroke-width="2"/></svg>AFL Lab</a>
-  <nav aria-label="Main">
-    <a href="../../">Home</a>
-    <a href="./" aria-current="page">Models</a>
-    <a href="../../#about">About</a>
-  </nav>
-</div></header>
+<header class="hero">
+  <nav class="top" data-root="../../" data-current="models" aria-label="Main"><noscript><div class="wrap"><a class="home-link" href="../../">AFL Lab home</a></div></noscript></nav>
+  <div class="wrap hero-grid solo">
+    <div>
+      <div class="eyebrow">Model 01</div>
+      <h1>Did they <span class="l2">deserve</span> <span class="l3">to win?</span></h1>
+      <p class="lede">A score mixes two things: how many chances a team made, and how well it kicked for goal. This model separates them.</p>
+    </div>
+  </div>
+  <div class="touchline" aria-hidden="true"></div>
+</header>
 
 <main>
-  <div class="wrap intro">
-    <p class="label">Model 01</p>
-    <h1>Did they deserve to win?</h1>
-    <p class="lede">A score mixes two things: how many chances a team made, and how well it kicked for goal. This model separates them.</p>
-  </div>
-
-  <div class="wrap">
+  <div class="wrap" style="padding-top:2.5rem">
     <div class="board calc" id="model">
       <form class="inputs" onsubmit="return false" aria-label="Model inputs">
         <div class="side">
@@ -152,12 +153,12 @@
       <div class="sub">
         <h3>Biggest upsets by scoring shots</h3>
         <p>Winners the model gave the smallest chance, from each side's scoring shots.</p>
-        <div id="upsets-box"><div class="pending">Waiting for <code>data/deserved_afl_2026.json</code>. Run <code>npm run build:afl</code> to build it.</div></div>
+        <div id="upsets-box"><div class="pending"><b>In development.</b> The 2026 upsets will appear here once the season data is published.</div></div>
       </div>
       <div class="sub">
         <h3>Luck ladder</h3>
         <p>Wins minus expected wins. Positive means a team won more than its scoring shots earned.</p>
-        <div id="ladder-box"><div class="pending">The ladder needs the same data file.</div></div>
+        <div id="ladder-box"><div class="pending"><b>In development.</b> The luck ladder will appear here with the same data.</div></div>
       </div>
     </div>
     <div class="sub read">
@@ -169,7 +170,7 @@
   <section id="report-card"><div class="wrap stack">
     <div class="sec-head"><h2>Does the model work?</h2></div>
     <p class="lead">If the model is honest, favourites it gives a 70% chance should win about 70% of the time. Each row groups 2026 matches by the favourite's chance.</p>
-    <div id="calibration-box"><div class="pending">The report card fills in from the same 2026 data file.</div></div>
+    <div id="calibration-box"><div class="pending"><b>In development.</b> The report card will appear here with the same data.</div></div>
     <p class="lead" id="brier"></p>
     <p class="read" style="color: var(--muted); font-size: var(--s-1)">This checks the model on matches already played, after the final siren. It shows the model is fair about chances. It doesn't show it can tip next week's winners.</p>
   </div></section>
@@ -181,7 +182,8 @@
 </main>
 
 <footer><div class="wrap">
-  <span>AFL Lab by Mark Busani, Perth. Not affiliated with the AFL or any club.</span>
+  <span>AFL Lab by <a href="https://github.com/mbusani">Mark Busani</a>, Perth. Not affiliated with the AFL or any club.</span>
+  <span>If you'd like anything changed or removed, please <a href="https://github.com/mbusani/afl-lab/issues">open an issue</a>.</span>
 </div></footer>
 
 <script type="module">

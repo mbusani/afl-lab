@@ -7,6 +7,9 @@ from playwright.sync_api import sync_playwright
 ROOT = pathlib.Path(__file__).parents[1]
 DATA = ROOT / "data" / "deserved_afl_2026.json"
 MODEL = "/models/deserved-to-win/"
+DEV_PAGES = ("/tasks/", "/credits/", "/repos/", "/library/", "/training/")
+ALL_PAGES = ("/", MODEL) + DEV_PAGES
+KEYS = {"/": None, MODEL: "Models", "/tasks/": "Tasks", "/credits/": "Credits", "/repos/": "Repos", "/library/": "Library", "/training/": "Training"}
 
 
 @pytest.fixture(scope="module")
@@ -55,16 +58,36 @@ def test_stepper_buttons(base, page):
 
 
 def test_pages_fit_phone_width(base, page):
-    for path in ("/", MODEL):
+    for path in ALL_PAGES:
         page.goto(base + path)
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), path
+
+
+def test_menu_marks_current_and_links_resolve(base, page):
+    for path, name in KEYS.items():
+        page.goto(base + path)
+        current = page.locator('nav.top a[aria-current="page"]')
+        assert current.count() == (1 if name else 0), path
+        if name:
+            assert current.text_content() == name
+        for href in page.eval_on_selector_all("nav.top a", "els => els.map(e => e.href)"):
+            assert page.request.get(href.split("#")[0]).status == 200, href
+        assert page.errors == [], path
+
+
+def test_dev_pages_say_in_development(base, page):
+    for path in DEV_PAGES:
+        page.goto(base + path)
+        assert "In development" in page.text_content("main"), path
 
 
 def test_waiting_message_without_data(base, page):
     if DATA.exists():
         pytest.skip("season data present")
     page.goto(base + MODEL)
-    assert "npm run build:afl" in page.text_content("#upsets-box")
+    for box in ("#upsets-box", "#ladder-box", "#calibration-box"):
+        assert "In development" in page.text_content(box)
+    assert "npm run build:afl" not in page.text_content("main")
 
 
 def test_season_tables(base, page):
@@ -114,13 +137,54 @@ def test_home_ball_route_uses_live_sections_only(base, page):
     assert page.get_attribute("#map animateMotion", "path") == route
 
 
+def night_styled_outside_hero(page):
+    """Count of night-styled hero elements (.brand, .eyebrow, .lede, nav.top) that sit outside .hero."""
+    outside = ".brand, .eyebrow, .lede, nav.top"
+    return page.evaluate("s => [...document.querySelectorAll(s)].filter(e => !e.closest('.hero')).length", outside)
+
+
 def test_home_has_no_night_styled_text_outside_hero(base, page):
     page.goto(base + "/")
     assert page.locator(".hero nav.top .brand").count() == 1
     assert page.locator(".hero .eyebrow").count() == 1
     assert page.locator(".hero .lede").count() == 1
-    outside = ".brand, .eyebrow, .lede, nav.top"
-    assert page.evaluate("s => [...document.querySelectorAll(s)].filter(e => !e.closest('.hero')).length", outside) == 0
+    assert night_styled_outside_hero(page) == 0
+
+
+def test_model_has_no_night_styled_text_outside_hero(base, page):
+    page.goto(base + MODEL)
+    assert page.locator(".hero nav.top .brand").count() == 1
+    assert page.locator(".hero .eyebrow").count() == 1
+    assert page.locator(".hero .lede").count() == 1
+    assert night_styled_outside_hero(page) == 0
+
+
+@pytest.mark.parametrize("scheme", ["light", "dark"])
+def test_model_text_meets_aa_contrast(base, page, scheme):
+    """Every visible text node, against the nearest opaque background behind it."""
+    page.emulate_media(color_scheme=scheme)
+    page.goto(base + MODEL)
+    page.wait_for_function("document.fonts.ready.then(() => true)")
+    fails = page.evaluate("""() => {
+        const rgb = (c) => c.match(/[\\d.]+/g).map(Number);
+        const lum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+        const bgOf = (el) => { for (; el; el = el.parentElement) { const s = getComputedStyle(el), c = rgb(s.backgroundColor);
+            if (s.backgroundImage !== 'none') return 'image'; if (c.length < 4 || c[3] === 1) return c; } return [255, 255, 255]; };
+        const out = [], w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        for (let t; (t = w.nextNode());) {
+            const el = t.parentElement;
+            if (!t.textContent.trim() || el.closest('script,style,noscript,svg') || !el.getClientRects().length) continue;
+            const s = getComputedStyle(el); if (s.visibility === 'hidden' || +s.opacity === 0) continue;
+            const bg = bgOf(el); if (bg === 'image') continue;
+            if (s.color === 'rgba(0, 0, 0, 0)' && parseFloat(s.webkitTextStrokeWidth) > 0) continue; // outlined display text
+            const fg = rgb(s.color), a = fg.length > 3 ? fg[3] : 1;
+            const mix = fg.slice(0, 3).map((v, i) => v * a + bg[i] * (1 - a));
+            const [hi, lo] = [lum(mix), lum(bg)].sort((x, y) => y - x), ratio = (hi + 0.05) / (lo + 0.05);
+            if (ratio < 4.5) out.push(el.tagName + '.' + el.className + ' "' + t.textContent.trim().slice(0, 30) + '" ' + ratio.toFixed(2));
+        }
+        return out; }""")
+    page.emulate_media(color_scheme="light")
+    assert fails == []
 
 
 @pytest.mark.parametrize("scheme", ["light", "dark"])

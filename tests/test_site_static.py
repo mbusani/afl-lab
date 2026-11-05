@@ -45,3 +45,14 @@ def test_no_ball_brand_name():
     files = [ROOT / "assets/site.css", ROOT / "assets/site.js"] + [ROOT / p for p in PAGES if (ROOT / p).exists()]
     for f in files:
         assert "sherrin" not in f.read_text(encoding="utf-8").lower(), f
+
+
+@pytest.mark.parametrize("path", [p for p in PAGES if (ROOT / p).exists()])
+def test_page_rules(path):
+    html = (ROOT / path).read_text(encoding="utf-8")
+    footer = re.search(r"<footer.*?</footer>", html, re.S).group(0)
+    assert "Not affiliated with the AFL or any club" in footer
+    assert "afl-lab/issues" in footer
+    assert "<noscript>" in html
+    for tag in ('property="og:title"', 'property="og:description"', 'property="og:image"', 'name="twitter:card"', "favicon.svg"):
+        assert tag in html, tag
