@@ -32,13 +32,9 @@ npm test                          # model and season analysis (Node 22, no depen
 python3 -m pytest tests           # data build and browser smoke tests (needs pytest and playwright)
 ```
 
-## View locally
+## GitHub
 
-```bash
-python3 -m http.server 8000
-```
-
-Then open http://localhost:8000.
+https://github.com/mbusani/afl-lab
 
 ## Credits
 
