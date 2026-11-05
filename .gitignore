@@ -9,3 +9,6 @@
 # Python bytecode
 __pycache__/
 *.pyc
+
+# Working notes: this repo is public
+.internal/

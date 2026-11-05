@@ -6,22 +6,45 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>AFL Lab</title>
 <meta name="description" content="AFL Lab by Mark Busani: Australian football explained with models you can try, check and argue with.">
+<meta property="og:title" content="AFL Lab">
+<meta property="og:description" content="Australian football explained with models you can try, check and argue with.">
+<meta property="og:url" content="https://mbusani.github.io/afl-lab/">
+<meta property="og:image" content="https://mbusani.github.io/afl-lab/assets/img/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=IBM+Plex+Mono:wght@500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js"></script>
 <style>
-/* Landing: the scoreboard hero states the thesis (a score is more than who won), then the three rules, the models, the author. */
-.hero { padding-block: 3rem 3.5rem; }
-.hero-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: center; }
-.hero h1 { font-size: var(--s4); text-transform: uppercase; }
-.hero h1 em { font-style: normal; color: var(--accent); }
-.hero .lede { font-size: var(--s1); line-height: 1.45; margin-top: 1.25rem; max-width: 34ch; }
-.cta { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.75rem; }
-.btn { display: inline-flex; align-items: center; gap: 0.4rem; font: 700 var(--s0)/1 var(--display); letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; padding: 0.85rem 1.2rem; border-radius: var(--radius); border: 2px solid var(--fg); }
-.btn.primary { background: var(--fg); color: var(--bg); }
-.btn.primary:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn:hover { color: var(--accent); }
+/* Landing: the night hero and site map (the oval), the guide to each section, the worked example, then the three rules, the models, the author. */
+#map { display: block; width: 100%; aspect-ratio: 210/136; border-radius: 16px; background: var(--night-2); box-shadow: 0 0 0 1px var(--nline), 0 30px 80px -30px rgba(255,201,60,.35); }
+.map-line { fill: none; stroke: var(--nline); stroke-width: .7; }
+.map-pass { fill: none; stroke: var(--lamp); stroke-width: .8; stroke-opacity: .4; }
+.map-node circle { fill: var(--night); stroke: var(--lamp); stroke-width: 1.1; transition: fill .2s; }
+.map-node text { fill: var(--chalk); font-family: var(--display); font-weight: 800; font-size: 6.6px; letter-spacing: .04em; text-transform: uppercase; text-anchor: middle; }
+.map-node.dev circle { stroke: var(--nline); stroke-dasharray: 2 2; }
+.map-node.dev text { fill: var(--chalk-dim); }
+.map-node:hover circle, .map-node:focus-visible circle { fill: var(--night-2); stroke: var(--chalk); }
+.map-ball { fill: var(--lamp); }
+.guide { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.1rem; }
+.stop { display: flex; flex-direction: column; gap: .5rem; padding: 1.4rem 1.5rem; background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px; color: var(--fg); text-decoration: none; transition: border-color .2s, transform .25s; }
+.stop:hover { border-color: var(--accent); transform: translateY(-2px); color: var(--fg); }
+.stop small { font: 500 .7rem/1 var(--mono); letter-spacing: .08em; color: var(--accent); }
+.stop b { font: 900 2.5rem/1 var(--display); text-transform: uppercase; }
+.stop span { color: var(--muted); }
+.stop em { margin-top: auto; padding-top: .4rem; font-style: normal; font-weight: 700; font-size: .9rem; color: var(--accent); }
+.coming { margin-top: 2rem; }
+.coming .label { margin-bottom: .75rem; }
+#stops-dev .stop { padding: 1rem 1.2rem; background: var(--panel); border-style: dashed; }
+#stops-dev .stop b { font-size: 1.6rem; color: var(--muted); }
+#stops-dev .stop small { color: var(--muted); }
+#stops-dev .chip { align-self: flex-start; }
+.example { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 2rem; align-items: center; }
+.example .board { margin: 0; }
+@media (max-width: 760px) { .example { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .stop { transition: none; } .stop:hover { transform: none; } }
 
 /* the scoreboard: two scores that tell different stories */
 .sb-rows { display: grid; gap: 0.35rem; margin-top: 0.75rem; }
@@ -44,15 +67,13 @@ a.model:hover h3 { color: var(--accent); }
 .model .no { font: 800 var(--s3)/1 var(--display); color: var(--muted); }
 .model h3 { font-size: var(--s2); text-transform: none; letter-spacing: 0; }
 .model p { color: var(--muted); font-size: var(--s-1); margin-top: 0.3rem; }
-.chip { font: 700 0.8rem/1 var(--display); letter-spacing: 0.1em; text-transform: uppercase; padding: 0.4rem 0.6rem; border-radius: 999px; border: 1.5px solid currentColor; white-space: nowrap; }
 .chip.live { color: var(--home); }
-.chip.soon { color: var(--muted); }
 
 .about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; }
 .about p + p { margin-top: 1rem; }
 
 @media (max-width: 760px) {
-  .hero-grid, .about { grid-template-columns: minmax(0, 1fr); }
+  .about { grid-template-columns: minmax(0, 1fr); }
   .rules { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
   .model { grid-template-columns: 3rem minmax(0, 1fr); }
   .model .chip { grid-column: 2; justify-self: start; }
@@ -61,27 +82,37 @@ a.model:hover h3 { color: var(--accent); }
 </head>
 <body>
 
-<header class="top"><div class="wrap">
-  <a class="brand" href="./"><svg viewBox="0 0 32 22" aria-hidden="true"><ellipse cx="16" cy="11" rx="15" ry="10" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M16 1v20M10 11h12" stroke="currentColor" stroke-width="2"/></svg>AFL Lab</a>
-  <nav aria-label="Main">
-    <a href="./" aria-current="page">Home</a>
-    <a href="models/deserved-to-win/">Models</a>
-    <a href="#about">About</a>
-  </nav>
-</div></header>
+<header class="hero">
+  <nav class="top" data-root="" aria-label="Main"><noscript><div class="wrap"><a class="home-link" href="./">AFL Lab home</a></div></noscript></nav>
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Mark Busani · Perth, Western Australia</div>
+      <h1>AFL<span class="l2">Analytics</span><span class="l3">Lab</span></h1>
+      <p class="lede">Footy, explained by the numbers. <b>Models you can try, check and argue with, plus commentary on what they say about the season.</b></p>
+      <div class="cta">
+        <a class="go" href="models/deserved-to-win/">Try the first model →</a>
+        <a class="gh" href="#guide">See what's here ↓</a>
+      </div>
+    </div>
+    <figure class="net">
+      <svg id="map" viewBox="0 0 210 136" role="group" aria-label="A map of the site, drawn as players on an oval: each player links to a section"></svg>
+      <figcaption><span>The lab as a team: pick a player to open that section</span><span>dashed = in development</span></figcaption>
+    </figure>
+  </div>
+  <div class="touchline" aria-hidden="true"></div>
+</header>
 
 <main>
-  <div class="wrap hero">
-    <div class="hero-grid">
-      <div>
-        <p class="label">Mark Busani · Perth, Western Australia</p>
-        <h1>Footy, explained <em>by the numbers</em></h1>
-        <p class="lede">Models you can try, check and argue with, plus commentary on what they say about the season.</p>
-        <div class="cta">
-          <a class="btn primary" href="models/deserved-to-win/">Try the first model →</a>
-          <a class="btn" href="#how">How it works</a>
-        </div>
-      </div>
+  <section id="guide"><div class="wrap">
+    <div class="sec-head"><h2>What's here</h2></div>
+    <div class="guide" id="stops"></div>
+    <div class="coming">
+      <p class="label">Coming next</p>
+      <div class="guide" id="stops-dev"></div>
+    </div>
+  </div></section>
+
+  <section id="example"><div class="wrap example">
       <figure class="board" aria-label="Example scoreboard: two sides with the same scoring shots">
         <p class="label">Example · same chances, different result</p>
         <div class="sb-rows">
@@ -90,15 +121,11 @@ a.model:hover h3 { color: var(--accent); }
         </div>
         <p class="sb-note">Both sides had <b>22 scoring shots</b>. The 20-point margin is all goalkicking. Read a score as goals.behinds (points): <span class="score">14.8 (92)</span> is 14 goals and 8 behinds.</p>
       </figure>
-    </div>
-  </div>
-
-  <div class="wrap">
-    <figure class="photo wide">
-      <img src="assets/img/adelaide-oval-scoreboard.jpg" width="1600" height="1012" loading="lazy" alt="Black-and-white photo of a packed Adelaide Oval: a huge crowd in hats curves around the boundary, with the old scoreboard behind them and players near the goal posts.">
-      <figcaption>Adelaide Oval, about 1955, probably a South Australian league final. The scoreboard shows goals, behinds and points. Photo: <a href="https://commons.wikimedia.org/wiki/File:Australian_Rules_Football_Match(GN14945).jpg">State Government Photographer</a>, CC0, via Wikimedia Commons.</figcaption>
+    <figure class="photo">
+      <img src="assets/img/shai-bolton-mark-mcg-2021.jpg" width="1440" height="900" alt="Richmond's Shai Bolton, airborne with the ball in both hands, marks above Geelong players beside the goal post, with a full MCG crowd behind.">
+      <figcaption>Shai Bolton of Richmond marks over Geelong at the MCG, 2021. Photo: <a href="https://commons.wikimedia.org/wiki/File:Shai_Bolton_MOTY_2021.jpg">Storm machine</a>, cropped, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, via Wikimedia Commons.</figcaption>
     </figure>
-  </div>
+  </div></section>
 
   <section id="how"><div class="wrap">
     <div class="sec-head"><h2>Three rules</h2><span class="label">How every piece works</span></div>
@@ -117,16 +144,6 @@ a.model:hover h3 { color: var(--accent); }
         <div><h3>Did they deserve to win?</h3><p>Scoring shots, goalkicking luck and the 2026 upsets. Includes the luck-or-skill test.</p></div>
         <span class="chip live">Try it</span>
       </a>
-      <div class="model">
-        <span class="no">02</span>
-        <div><h3>AFLW: did they deserve to win?</h3><p>The same model for the women's game, once a reliable source for goals and behinds is confirmed.</p></div>
-        <span class="chip soon">Waiting on data</span>
-      </div>
-      <div class="model">
-        <span class="no">03</span>
-        <div><h3>A-League Men and Women</h3><p>A soccer version built on shots, for weekly reads through the AFL off-season.</p></div>
-        <span class="chip soon">Waiting on data</span>
-      </div>
     </div>
   </div></section>
 
@@ -150,8 +167,29 @@ a.model:hover h3 { color: var(--accent); }
 </main>
 
 <footer><div class="wrap">
-  <span>AFL Lab by Mark Busani, Perth. Not affiliated with the AFL or any club.</span>
-  <span>Scores shown as goals.behinds (points).</span>
+  <span>AFL Lab by <a href="https://github.com/mbusani">Mark Busani</a>, Perth. Not affiliated with the AFL or any club.</span>
+  <span>Scores shown as goals.behinds (points). The code is MIT-licensed; photos and data keep their own terms.</span>
+  <span>If you'd like anything changed or removed, please <a href="https://github.com/mbusani/afl-lab/issues">open an issue</a>.</span>
 </div></footer>
+
+<script>
+const card = (s, i) => `<a class="stop" href="${s.path}"><small>${String(i + 1).padStart(2, "0")}</small><b>${s.name}</b><span>${s.what}</span>${s.status === "dev" ? '<span class="chip dev">In development</span>' : `<em>Open ${s.name} →</em>`}</a>`;
+document.getElementById("stops").innerHTML = LAB.SECTIONS.filter(s => s.status === "live").map(card).join("");
+document.getElementById("stops-dev").innerHTML = LAB.SECTIONS.filter(s => s.status === "dev").map(card).join("");
+
+/* the site map: each section is a player on a night oval, and the ball is passed between the live ones */
+(function map() {
+  const W = 210, H = 136, cx = W / 2, cy = H / 2, reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const spots = [[.2, .5], [.42, .2], [.42, .8], [.62, .5], [.8, .3], [.8, .7]];
+  const P = LAB.SECTIONS.map((s, i) => ({s, x: spots[i][0] * W, y: spots[i][1] * H}));
+  const live = P.filter(p => p.s.status === "live");
+  const route = `M${live.map(p => `${p.x} ${p.y}`).join(" L")} Z`;
+  let svg = `<g class="map-line"><ellipse cx="${cx}" cy="${cy}" rx="100" ry="63"/><rect x="${cx - 16}" y="${cy - 16}" width="32" height="32"/><circle cx="${cx}" cy="${cy}" r="7"/><path d="M38 ${cy - 32} A42 42 0 0 1 38 ${cy + 32}"/><path d="M172 ${cy - 32} A42 42 0 0 0 172 ${cy + 32}"/><rect x="5" y="${cy - 6}" width="9" height="12"/><rect x="196" y="${cy - 6}" width="9" height="12"/></g>`;
+  svg += `<path class="map-pass" d="${route}"/>`;
+  svg += P.map(p => `<a class="map-node${p.s.status === "dev" ? " dev" : ""}" href="${p.s.path}" aria-label="${p.s.name}${p.s.status === "dev" ? ", in development" : ""}"><circle cx="${p.x}" cy="${p.y}" r="17"/><text x="${p.x}" y="${p.y + 2.3}">${p.s.name}</text></a>`).join("");
+  svg += `<ellipse class="map-ball" rx="3.4" ry="2.3" cx="${reduce ? live[0].x : 0}" cy="${reduce ? live[0].y - 17 : 0}">${reduce ? "" : `<animateMotion dur="9s" repeatCount="indefinite" rotate="auto" path="${route}"/>`}</ellipse>`;
+  document.getElementById("map").innerHTML = svg;
+})();
+</script>
 </body>
 </html>
