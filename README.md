@@ -38,4 +38,4 @@ https://github.com/mbusani/afl-lab
 
 ## Credits
 
-Match scores: Squiggle API by Max Barry. Photos via Wikimedia Commons: State Government Photographer and Evad37 (CC0); Storm machine (CC BY-SA 4.0, cropped). Code: MIT.
+Match scores: Squiggle API by Max Barry. Photos via Wikimedia Commons: State Government Photographer (CC0); Storm machine (CC BY-SA 4.0, cropped). Code: MIT.

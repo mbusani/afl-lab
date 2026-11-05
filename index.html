@@ -69,11 +69,7 @@ a.model:hover h3 { color: var(--accent); }
 .model p { color: var(--muted); font-size: var(--s-1); margin-top: 0.3rem; }
 .chip.live { color: var(--home); }
 
-.about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; }
-.about p + p { margin-top: 1rem; }
-
 @media (max-width: 760px) {
-  .about { grid-template-columns: minmax(0, 1fr); }
   .rules { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
   .model { grid-template-columns: 3rem minmax(0, 1fr); }
   .model .chip { grid-column: 2; justify-self: start; }
@@ -147,23 +143,6 @@ a.model:hover h3 { color: var(--accent); }
     </div>
   </div></section>
 
-  <section id="about"><div class="wrap">
-    <div class="sec-head"><h2>About</h2></div>
-    <div class="about">
-      <div class="read">
-        <p>I'm Mark Busani, an analyst in Perth working with SQL, Python and R. I'm studying the Barça Innovation Hub's Sports Analytics Postgraduate and starting an AFL analyst course in January 2027.</p>
-        <p>AFL Lab is where I build models in the open. Most footy sites tell you who will win. This one explains why results happen, shows its working, and says when the model is wrong.</p>
-      </div>
-      <div class="read">
-        <p class="label">Data and credits</p>
-        <p>Match scores come from the <a href="https://api.squiggle.com.au">Squiggle API</a> by Max Barry. The site uses only public match scores, never licensed player-tracking data. Code is MIT-licensed.</p>
-        <figure class="photo">
-      <img src="assets/img/perth-stadium-goal-posts.jpg" width="1200" height="899" loading="lazy" alt="Four tall white goal and behind posts in front of mostly empty grey stadium seats, with a few spectators, at Perth Stadium.">
-      <figcaption>Goal posts at Perth Stadium, 2018. Photo: <a href="https://commons.wikimedia.org/wiki/File:Perth_Stadium_goal_posts_2018_(crop).jpg">Evad37</a>, CC0, via Wikimedia Commons.</figcaption>
-    </figure>
-      </div>
-    </div>
-  </div></section>
 </main>
 
 <footer><div class="wrap">

@@ -103,7 +103,7 @@ def test_season_tables(base, page):
 
 
 def test_photos_load_with_alt_and_credit(base, page):
-    for path, want in (("/", 2), (MODEL, 1)):
+    for path, want in (("/", 1), (MODEL, 1)):
         page.goto(base + path)
         figs = page.locator("figure.photo")
         assert figs.count() == want, path
@@ -123,7 +123,7 @@ def test_home_cards_and_map(base, page):
     assert "In development" in page.text_content("#stops-dev")
     assert page.locator("#map a.map-node").count() == 6
     assert page.locator("#map a.map-node.dev").count() == 3
-    assert page.locator("nav.top a.lnk").count() == 7
+    assert page.locator("nav.top a.lnk").count() == 6
     assert page.errors == []
 
 

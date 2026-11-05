@@ -56,7 +56,6 @@ p { margin: 0; }
 .photo { margin: 0; display: grid; gap: 0.5rem; }
 .photo img { display: block; width: 100%; height: auto; border-radius: var(--radius); }
 .photo figcaption { font-size: var(--s-1); line-height: 1.4; color: var(--muted); }
-.about .photo { margin-top: 1.5rem; }
 #season .photo { max-width: 68ch; }
 
 /* tables */
